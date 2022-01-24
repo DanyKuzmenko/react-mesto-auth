@@ -27,6 +27,7 @@ class Main extends React.Component {
             .then((res) => {
                 this.setState({ cards: res })
             })
+            .catch(error => console.log(error));
     }
 
     render() {
@@ -34,8 +35,8 @@ class Main extends React.Component {
             <main className="content">
                 <section className="profile">
                     <div className="profile__position">
-                        <img src={avatarChange} alt="Изменить аватар." className="profile__avatar-change" onClick={this.props.onEditAvatar} />
-                        <img src={this.state.userAvatar} alt="Жак-Ив Кусто в центре фото, на заднем плане море." className="profile__avatar" />
+                        <img src={avatarChange} alt="Изменить аватар." className="profile__avatar-change" />
+                        <img src={this.state.userAvatar} alt="Жак-Ив Кусто в центре фото, на заднем плане море." className="profile__avatar" onClick={this.props.onEditAvatar} />
                         <div className="profile__info">
                             <div className="profile__info-position">
                                 <h1 className="profile__name">{this.state.userName}</h1>
