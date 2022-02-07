@@ -10,6 +10,8 @@ import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
 import DeleteCardPopup from './DeleteCardPopup';
 
+// валидацию форм сделать не успел, сделаю позже:))
+
 function App() {
     const [isEditProfilePopupOpen, setProfilePopupStatus] = React.useState(false);
     const [isAddPlacePopupOpen, setAddPlacePopupStatus] = React.useState(false);
@@ -23,11 +25,17 @@ function App() {
     const [cards, addCard] = React.useState([]);
     const [selectedDeleteCard, setSelectedDeleteCard] = React.useState({});
     //Добавил новый пропс, для удаления карточки с помощью попапа
+    const [addPlaceButtonName, setAddPlaceButtonName] = React.useState('Создать');
+    const [userPopupButtonName, setUserPopupButtonName] = React.useState('Сохранить');
+    const [deleteCardPopupButtonName, setDeleteCardPopupButtonName] = React.useState('Да');
+    // добавил стейты для управления содержимым кнопки при сабмите формы. Передаю стейт с помощью пропса
+    // buttonName, а сам стейт изменяю в App.js. Также для аватара пользователя и его информации сделал один стейт
+    // т.к. содержимое кнопки одинаковое
 
     React.useEffect(() => {
         apiClass.getUserApiInfo()
             .then(res => {
-                setCurrentUser({name: res.name, about: res.about, _id: res._id});
+                setCurrentUser({ name: res.name, about: res.about, _id: res._id });
                 setCurrentUserAvatar(res.avatar);
             })
             .catch(err => console.log(err));
@@ -81,39 +89,55 @@ function App() {
     }
 
     function handleUpdateUser({ name, about }) {
+        setUserPopupButtonName('Сохранение...');
         apiClass.sendUserApiInfo(name, about)
             .then(() => {
                 setCurrentUser({ name, about });
                 closeAllPopups();
             })
             .catch(err => console.log(err))
+            .finally(() => {
+                setUserPopupButtonName('Сохранить');
+            })
     }
 
     function handleUpdateAvatar({ avatar }) {
+        setUserPopupButtonName('Сохранение...');
         apiClass.updateAvatar(avatar)
             .then(() => {
                 setCurrentUserAvatar(avatar);
                 closeAllPopups();
             })
             .catch(err => console.log(err))
+            .finally(() => {
+                setUserPopupButtonName('Сохранить');
+            })
     }
 
     function handleAddPlaceSubmit({ name, link }) {
+        setAddPlaceButtonName('Создание...');
         apiClass.sendCardInfo(name, link)
             .then((newCard) => {
                 addCard([newCard, ...cards]);
                 closeAllPopups();
             })
             .catch(err => console.log(err))
+            .finally(() => {
+                setAddPlaceButtonName('Создать');
+            })
     }
 
     function handleDeleteCardSubmit() {
+        setDeleteCardPopupButtonName('Удаление...');
         apiClass.deleteApiCard(selectedDeleteCard.id)
             .then(() => {
                 addCard((cards) => cards.filter(item => item._id !== selectedDeleteCard.id));
                 closeAllPopups();
             })
             .catch(err => console.log(err))
+            .finally(() => {
+                setDeleteCardPopupButtonName('Да');
+            })
     }
 
     return (
@@ -127,25 +151,29 @@ function App() {
                     onCardClick={handleCardClick}
                     cards={cards}
                     onCardLike={handleCardLike}
-                    onCardDelete={handleCardDelete} 
+                    onCardDelete={handleCardDelete}
                     avatar={currentUserAvatar} />
                 <Footer />
                 <EditProfilePopup
                     isOpen={isEditProfilePopupOpen}
                     onClose={closeAllPopups}
-                    onUpdateUser={handleUpdateUser} />
+                    onUpdateUser={handleUpdateUser} 
+                    buttonName={userPopupButtonName} />
                 <EditAvatarPopup
                     isOpen={isEditAvatarPopupOpen}
                     onClose={closeAllPopups}
-                    onUpdateAvatar={handleUpdateAvatar} />
+                    onUpdateAvatar={handleUpdateAvatar}
+                    buttonName={userPopupButtonName} />
                 <AddPlacePopup
                     isOpen={isAddPlacePopupOpen}
                     onClose={closeAllPopups}
-                    onUpdateCard={handleAddPlaceSubmit} />
+                    onUpdateCard={handleAddPlaceSubmit}
+                    buttonName={addPlaceButtonName} />
                 <DeleteCardPopup
                     isOpen={isDeleteCardPopupOpen}
                     onClose={closeAllPopups}
-                    onDeleteCard={handleDeleteCardSubmit} />
+                    onDeleteCard={handleDeleteCardSubmit}
+                    buttonName={deleteCardPopupButtonName} />
                 <ImagePopup card={selectedCard} onClose={closeAllPopups} />
             </CurrentUserContext.Provider>
         </>
