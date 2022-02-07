@@ -28,6 +28,8 @@ function EditProfilePopup(props) {
             name,
             about: description,
         });
+        e.target.reset();
+        //сделал очистку полей при самбите, или лучше при открытии?   
     }
 
     return (

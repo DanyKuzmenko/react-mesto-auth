@@ -17,6 +17,9 @@ function App() {
     const [isDeleteCardPopupOpen, setDeleteCardPopupStatus] = React.useState(false);
     const [selectedCard, setSelectedCard] = React.useState({});
     const [currentUser, setCurrentUser] = React.useState({});
+    const [currentUserAvatar, setCurrentUserAvatar] = React.useState('');
+    // использую отдельный стейт для аватара, т.к. если использовать один стейт для аватара и данных о пользователе,
+    // то при сабмите пользователя исчезает аватар, а при сабмите аватара исчезают данные пользователя
     const [cards, addCard] = React.useState([]);
     const [selectedDeleteCard, setSelectedDeleteCard] = React.useState({});
     //Добавил новый пропс, для удаления карточки с помощью попапа
@@ -24,7 +27,8 @@ function App() {
     React.useEffect(() => {
         apiClass.getUserApiInfo()
             .then(res => {
-                setCurrentUser(res);
+                setCurrentUser({name: res.name, about: res.about, _id: res._id});
+                setCurrentUserAvatar(res.avatar);
             })
             .catch(err => console.log(err));
         apiClass.getInitialCards()
@@ -32,7 +36,7 @@ function App() {
                 addCard(res);
             })
             .catch(error => console.log(error));
-    }, [addCard, setCurrentUser]);
+    }, [addCard, setCurrentUser, setCurrentUserAvatar]);
     // Сначала выполнил проект с помощью классовых компонентов, только потом посмотрел вебинар и понял,
     // что хуки намного современее и нужно использовать их. Переделал все под хуки, но не уверен что правильно.
     // Сделал зависимости от изменения данных, чтобы данные приходили 1 раз. Можете пожалуйста оставить комментарий
@@ -88,7 +92,7 @@ function App() {
     function handleUpdateAvatar({ avatar }) {
         apiClass.updateAvatar(avatar)
             .then(() => {
-                setCurrentUser({ avatar });
+                setCurrentUserAvatar(avatar);
                 closeAllPopups();
             })
             .catch(err => console.log(err))
@@ -123,7 +127,8 @@ function App() {
                     onCardClick={handleCardClick}
                     cards={cards}
                     onCardLike={handleCardLike}
-                    onCardDelete={handleCardDelete} />
+                    onCardDelete={handleCardDelete} 
+                    avatar={currentUserAvatar} />
                 <Footer />
                 <EditProfilePopup
                     isOpen={isEditProfilePopupOpen}

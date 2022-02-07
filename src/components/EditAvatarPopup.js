@@ -10,6 +10,8 @@ function EditAvatarPopup(props) {
         props.onUpdateAvatar({
             avatar: avatarRef.current.value
         })
+        e.target.reset();
+        //сделал очистку полей при самбите, или лучше при открытии?   
     }
 
     return (
