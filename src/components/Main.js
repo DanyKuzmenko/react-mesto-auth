@@ -11,7 +11,7 @@ function Main(props) {
             <section className="profile">
                 <div className="profile__position">
                     <img src={avatarChange} alt="Изменить аватар." className="profile__avatar-change" />
-                    <img src={props.avatar} alt="Жак-Ив Кусто в центре фото, на заднем плане море." className="profile__avatar" onClick={props.onEditAvatar} />
+                    <img src={currentUser.avatar} alt="Жак-Ив Кусто в центре фото, на заднем плане море." className="profile__avatar" onClick={props.onEditAvatar} />
                     <div className="profile__info">
                         <div className="profile__info-position">
                             <h1 className="profile__name">{currentUser.name}</h1>
@@ -23,17 +23,19 @@ function Main(props) {
                 <button type="button" aria-label="Добавить карточку." className="profile__add-button" onClick={props.onAddPlace}></button>
             </section>
             <section className="cards">
-                {props.cards.map(item => <Card
-                    name={item.name}
-                    link={item.link}
-                    likes={item.likes}
-                    id={item._id}
-                    ownerId={item.owner._id}
-                    onCardDelete={props.onCardDelete}
-                    onCardLike={props.onCardLike}
-                    onCardClick={props.onCardClick}
-                    key={item._id}
-                />)}
+                {props.cards.map(item => (
+                    <Card
+                        name={item.name}
+                        link={item.link}
+                        likes={item.likes}
+                        id={item._id}
+                        ownerId={item.owner._id}
+                        onCardDelete={props.onCardDelete}
+                        onCardLike={props.onCardLike}
+                        onCardClick={props.onCardClick}
+                        key={item._id}
+                    />
+                ))}
             </section>
         </main>
     )

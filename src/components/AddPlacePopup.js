@@ -19,9 +19,12 @@ function AddPlacePopup(props) {
             name: name,
             link: link
         })
-        e.target.reset();
-        //сделал очистку полей при самбите, или лучше при открытии?
     }
+
+    React.useEffect(() => {
+        setName('');
+        setLink('');
+    }, [props.isOpen]);
 
     return (
         <PopupWithForm
@@ -29,7 +32,7 @@ function AddPlacePopup(props) {
             title="Новое место"
             buttonName={props.buttonName}
             isOpen={props.isOpen}
-            onClose={props.onClose} 
+            onClose={props.onClose}
             onSubmit={handleSubmit} >
             <input
                 type="text"
@@ -40,6 +43,7 @@ function AddPlacePopup(props) {
                 minLength="2"
                 maxLength="30"
                 id="input-card-name"
+                value={name}
                 onChange={handleNameChange} />
             <span
                 className="popup__error"
@@ -50,7 +54,8 @@ function AddPlacePopup(props) {
                 name="inputCardLink"
                 required
                 id="input-card-link"
-                type="url" 
+                type="url"
+                value={link}
                 onChange={handleLinkChange} />
             <span
                 className="popup__error"

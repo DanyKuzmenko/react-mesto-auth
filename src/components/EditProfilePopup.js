@@ -10,7 +10,7 @@ function EditProfilePopup(props) {
     React.useEffect(() => {
         setName(currentUser.name);
         setDescription(currentUser.about);
-    }, [currentUser]);
+    }, [currentUser, props.isOpen]);
 
     function handleNameChange(e) {
         setName(e.target.value);
@@ -27,8 +27,6 @@ function EditProfilePopup(props) {
             name,
             about: description,
         });
-        e.target.reset();
-        //сделал очистку полей при самбите, или лучше при открытии?   
     }
 
     return (
@@ -48,6 +46,7 @@ function EditProfilePopup(props) {
                 minLength="2"
                 maxLength="40"
                 id="input-name"
+                value={name || ''}
                 onChange={handleNameChange} />
             <span
                 className="popup__error"
@@ -61,6 +60,7 @@ function EditProfilePopup(props) {
                 minLength="2"
                 maxLength="200"
                 id="input-activity"
+                value={description || ''}
                 onChange={handleDescriptionChange} />
             <span
                 className="popup__error"

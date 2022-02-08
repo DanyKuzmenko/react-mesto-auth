@@ -13,15 +13,12 @@ import DeleteCardPopup from './DeleteCardPopup';
 // валидацию форм сделать не успел, сделаю позже:))
 
 function App() {
-    const [isEditProfilePopupOpen, setProfilePopupStatus] = React.useState(false);
-    const [isAddPlacePopupOpen, setAddPlacePopupStatus] = React.useState(false);
-    const [isEditAvatarPopupOpen, setEditAvatarPopupStatus] = React.useState(false);
-    const [isDeleteCardPopupOpen, setDeleteCardPopupStatus] = React.useState(false);
+    const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false);
+    const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
+    const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
+    const [isDeleteCardPopupOpen, setIsDeleteCardPopupOpen] = React.useState(false);
     const [selectedCard, setSelectedCard] = React.useState({});
     const [currentUser, setCurrentUser] = React.useState({});
-    const [currentUserAvatar, setCurrentUserAvatar] = React.useState('');
-    // использую отдельный стейт для аватара, т.к. если использовать один стейт для аватара и данных о пользователе,
-    // то при сабмите пользователя исчезает аватар, а при сабмите аватара исчезают данные пользователя
     const [cards, addCard] = React.useState([]);
     const [selectedDeleteCard, setSelectedDeleteCard] = React.useState({});
     //Добавил новый пропс, для удаления карточки с помощью попапа
@@ -35,8 +32,7 @@ function App() {
     React.useEffect(() => {
         apiClass.getUserApiInfo()
             .then(res => {
-                setCurrentUser({ name: res.name, about: res.about, _id: res._id });
-                setCurrentUserAvatar(res.avatar);
+                setCurrentUser(res);
             })
             .catch(err => console.log(err));
         apiClass.getInitialCards()
@@ -44,7 +40,14 @@ function App() {
                 addCard(res);
             })
             .catch(error => console.log(error));
-    }, [addCard, setCurrentUser, setCurrentUserAvatar]);
+        const closeByEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeAllPopups();
+            }
+        }
+        document.addEventListener('keydown', closeByEscape);
+        return () => document.removeEventListener('keydown', closeByEscape);
+    }, []);
     // Сначала выполнил проект с помощью классовых компонентов, только потом посмотрел вебинар и понял,
     // что хуки намного современее и нужно использовать их. Переделал все под хуки, но не уверен что правильно.
     // Сделал зависимости от изменения данных, чтобы данные приходили 1 раз. Можете пожалуйста оставить комментарий
@@ -60,20 +63,20 @@ function App() {
     }
 
     function handleCardDelete(card) {
-        setDeleteCardPopupStatus(true);
+        setIsDeleteCardPopupOpen(true);
         setSelectedDeleteCard(card);
     }
 
     function handleEditAvatarClick() {
-        setEditAvatarPopupStatus(true);
+        setIsEditAvatarPopupOpen(true);
     }
 
     function handleEditProfileClick() {
-        setProfilePopupStatus(true);
+        setIsEditProfilePopupOpen(true);
     }
 
     function handleAddPlaceClick() {
-        setAddPlacePopupStatus(true);
+        setIsAddPlacePopupOpen(true);
     }
 
     function handleCardClick(props) {
@@ -81,10 +84,10 @@ function App() {
     }
 
     function closeAllPopups() {
-        setProfilePopupStatus(false);
-        setAddPlacePopupStatus(false);
-        setEditAvatarPopupStatus(false);
-        setDeleteCardPopupStatus(false);
+        setIsEditProfilePopupOpen(false);
+        setIsAddPlacePopupOpen(false);
+        setIsEditAvatarPopupOpen(false);
+        setIsDeleteCardPopupOpen(false);
         setSelectedCard({});
     }
 
@@ -92,7 +95,8 @@ function App() {
         setUserPopupButtonName('Сохранение...');
         apiClass.sendUserApiInfo(name, about)
             .then(() => {
-                setCurrentUser({ name, about });
+                setCurrentUser({ name, about, _id: currentUser._id, avatar: currentUser.avatar });
+                // придумал только такой способ, чтобы добавить старые данные
                 closeAllPopups();
             })
             .catch(err => console.log(err))
@@ -105,7 +109,7 @@ function App() {
         setUserPopupButtonName('Сохранение...');
         apiClass.updateAvatar(avatar)
             .then(() => {
-                setCurrentUserAvatar(avatar);
+                setCurrentUser({ avatar, name: currentUser.name, _id: currentUser._id, about: currentUser.about });
                 closeAllPopups();
             })
             .catch(err => console.log(err))
@@ -141,42 +145,39 @@ function App() {
     }
 
     return (
-        <>
-            <CurrentUserContext.Provider value={currentUser}>
-                <Header />
-                <Main
-                    onEditProfile={handleEditProfileClick}
-                    onAddPlace={handleAddPlaceClick}
-                    onEditAvatar={handleEditAvatarClick}
-                    onCardClick={handleCardClick}
-                    cards={cards}
-                    onCardLike={handleCardLike}
-                    onCardDelete={handleCardDelete}
-                    avatar={currentUserAvatar} />
-                <Footer />
-                <EditProfilePopup
-                    isOpen={isEditProfilePopupOpen}
-                    onClose={closeAllPopups}
-                    onUpdateUser={handleUpdateUser} 
-                    buttonName={userPopupButtonName} />
-                <EditAvatarPopup
-                    isOpen={isEditAvatarPopupOpen}
-                    onClose={closeAllPopups}
-                    onUpdateAvatar={handleUpdateAvatar}
-                    buttonName={userPopupButtonName} />
-                <AddPlacePopup
-                    isOpen={isAddPlacePopupOpen}
-                    onClose={closeAllPopups}
-                    onUpdateCard={handleAddPlaceSubmit}
-                    buttonName={addPlaceButtonName} />
-                <DeleteCardPopup
-                    isOpen={isDeleteCardPopupOpen}
-                    onClose={closeAllPopups}
-                    onDeleteCard={handleDeleteCardSubmit}
-                    buttonName={deleteCardPopupButtonName} />
-                <ImagePopup card={selectedCard} onClose={closeAllPopups} />
-            </CurrentUserContext.Provider>
-        </>
+        <CurrentUserContext.Provider value={currentUser}>
+            <Header />
+            <Main
+                onEditProfile={handleEditProfileClick}
+                onAddPlace={handleAddPlaceClick}
+                onEditAvatar={handleEditAvatarClick}
+                onCardClick={handleCardClick}
+                cards={cards}
+                onCardLike={handleCardLike}
+                onCardDelete={handleCardDelete} />
+            <Footer />
+            <EditProfilePopup
+                isOpen={isEditProfilePopupOpen}
+                onClose={closeAllPopups}
+                onUpdateUser={handleUpdateUser}
+                buttonName={userPopupButtonName} />
+            <EditAvatarPopup
+                isOpen={isEditAvatarPopupOpen}
+                onClose={closeAllPopups}
+                onUpdateAvatar={handleUpdateAvatar}
+                buttonName={userPopupButtonName} />
+            <AddPlacePopup
+                isOpen={isAddPlacePopupOpen}
+                onClose={closeAllPopups}
+                onUpdateCard={handleAddPlaceSubmit}
+                buttonName={addPlaceButtonName} />
+            <DeleteCardPopup
+                isOpen={isDeleteCardPopupOpen}
+                onClose={closeAllPopups}
+                onDeleteCard={handleDeleteCardSubmit}
+                buttonName={deleteCardPopupButtonName} />
+            <ImagePopup card={selectedCard} onClose={closeAllPopups} />
+        </CurrentUserContext.Provider>
     );
 }
 
