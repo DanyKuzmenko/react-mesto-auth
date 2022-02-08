@@ -41,6 +41,7 @@ class Api {
                 about: userActivity
             })
         })
+            .then(this._checkResponse)
     }
 
     sendCardInfo(cardName, cardLink) {
@@ -65,6 +66,7 @@ class Api {
                 authorization: this._token
             }
         })
+            .then(this._checkResponse)
     }
 
     changeLikeCardStatus(cardId, isLiked) {
@@ -87,7 +89,7 @@ class Api {
                 .then(this._checkResponse)
         }
     }
-    
+
     updateAvatar(link) {
         return fetch(`${this._address}/users/me/avatar`, {
             method: 'PATCH',
@@ -99,6 +101,7 @@ class Api {
                 avatar: link
             })
         })
+            .then(this._checkResponse)
     }
 }
 

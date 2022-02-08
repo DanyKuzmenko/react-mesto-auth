@@ -94,9 +94,8 @@ function App() {
     function handleUpdateUser({ name, about }) {
         setUserPopupButtonName('Сохранение...');
         apiClass.sendUserApiInfo(name, about)
-            .then(() => {
-                setCurrentUser({ name, about, _id: currentUser._id, avatar: currentUser.avatar });
-                // придумал только такой способ, чтобы добавить старые данные
+            .then((res) => {
+                setCurrentUser(res);
                 closeAllPopups();
             })
             .catch(err => console.log(err))
@@ -108,8 +107,8 @@ function App() {
     function handleUpdateAvatar({ avatar }) {
         setUserPopupButtonName('Сохранение...');
         apiClass.updateAvatar(avatar)
-            .then(() => {
-                setCurrentUser({ avatar, name: currentUser.name, _id: currentUser._id, about: currentUser.about });
+            .then((res) => {
+                setCurrentUser(res);
                 closeAllPopups();
             })
             .catch(err => console.log(err))
