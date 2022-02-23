@@ -1,10 +1,8 @@
 import React from "react";
-import { Link, useHistory } from 'react-router-dom';
-import * as auth from '../auth';
+import { Link } from 'react-router-dom';
 
 function Register(props) {
     const [formData, setFormData] = React.useState({});
-    const history = useHistory();
 
     function handleInputChange(e) {
         const { name, value } = e.target;
@@ -16,17 +14,7 @@ function Register(props) {
 
     function handleSubmit(e) {
         e.preventDefault();
-        auth.register(formData.password, formData.email)
-            .then(res => {
-                if (res.statusCode !== 400) {
-                    props.onRegister(true);
-                    history.push('/signin');
-                }
-            })
-            .catch(err => {
-                console.log(err);
-                props.onRegister(false);
-            })
+        props.onRegister(formData.password, formData.email);
     }
 
     return (

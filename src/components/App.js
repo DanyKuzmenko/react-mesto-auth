@@ -14,7 +14,7 @@ import Login from './Login';
 import Register from './Register';
 import ProtectedRoute from './ProtectedRoute';
 import InfoTooltip from './InfoTooltip';
-import * as auth from '../auth';
+import * as auth from '../utils/auth';
 // валидацию форм сделать не успел, сделаю позже:))
 
 function App() {
@@ -159,18 +159,35 @@ function App() {
             })
     }
 
-    function handleLogin(token) {
-        localStorage.setItem('jwt', token);
-        setLoggedIn(true);
-    }
-
     function handleInfoTooltip(status) {
         setIsInfoTooltipOpen(true);
         setInfoTooltipStatus(status);
     }
 
-    function handleEmail(email) {
-        setEmail(email);
+    function handleLoginSubmit(password, email, clearFormData) {
+        auth.authorize(password, email)
+            .then(res => {
+                localStorage.setItem('jwt', res.token);
+                setLoggedIn(true);
+                setEmail(email);
+                clearFormData();
+                history.push('/');
+            })
+            .catch(err => console.log(err))
+    }
+
+    function handleRegisterSubmit(password, email) {
+        auth.register(password, email)
+            .then(res => {
+                if (res.statusCode !== 400) {
+                    handleInfoTooltip(true);
+                    history.push('/signin');
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                handleInfoTooltip(false);
+            })
     }
 
     return (
@@ -180,12 +197,11 @@ function App() {
             <Switch>
                 <Route path="/signup">
                     <Register
-                        onRegister={handleInfoTooltip} />
+                        onRegister={handleRegisterSubmit} />
                 </Route>
                 <Route path="/signin">
                     <Login
-                        onLogin={handleLogin}
-                        handleEmail={handleEmail} />
+                        onLogin={handleLoginSubmit} />
                 </Route>
                 <ProtectedRoute
                     path="/"
