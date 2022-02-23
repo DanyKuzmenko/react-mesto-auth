@@ -4,8 +4,8 @@
     margin: 45px auto 40px auto;
     padding-bottom: 41px;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    flex-direction: row;
+    justify-content: space-between;  
     border-bottom: 1px solid rgba(84, 84, 84, .7);
 }
 
@@ -13,5 +13,6 @@
     .header {
         margin: 28px auto 42px auto;
         padding-bottom: 31px;
+        flex-direction: column;
     }
 }

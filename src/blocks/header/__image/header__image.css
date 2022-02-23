@@ -4,7 +4,7 @@
 
 @media screen and (max-width: 320px) {
     .header__image {
-    margin-left: 27px;
-    /* не знаю как задать оступ, который будет изменяться от границы page, а не header */
+        margin-left: 30px;
+        /* не знаю как задать оступ, который будет изменяться от границы page, а не header */
     }
 }

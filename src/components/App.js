@@ -9,7 +9,12 @@ import EditProfilePopup from './EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup';
 import DeleteCardPopup from './DeleteCardPopup';
-
+import { Route, Switch, useHistory } from 'react-router-dom';
+import Login from './Login';
+import Register from './Register';
+import ProtectedRoute from './ProtectedRoute';
+import InfoTooltip from './InfoTooltip';
+import * as auth from '../auth';
 // валидацию форм сделать не успел, сделаю позже:))
 
 function App() {
@@ -21,13 +26,14 @@ function App() {
     const [currentUser, setCurrentUser] = React.useState({});
     const [cards, addCard] = React.useState([]);
     const [selectedDeleteCard, setSelectedDeleteCard] = React.useState({});
-    //Добавил новый пропс, для удаления карточки с помощью попапа
     const [addPlaceButtonName, setAddPlaceButtonName] = React.useState('Создать');
     const [userPopupButtonName, setUserPopupButtonName] = React.useState('Сохранить');
     const [deleteCardPopupButtonName, setDeleteCardPopupButtonName] = React.useState('Да');
-    // добавил стейты для управления содержимым кнопки при сабмите формы. Передаю стейт с помощью пропса
-    // buttonName, а сам стейт изменяю в App.js. Также для аватара пользователя и его информации сделал один стейт
-    // т.к. содержимое кнопки одинаковое
+    const [loggedIn, setLoggedIn] = React.useState(false);
+    const [isInfoTooltipOpen, setIsInfoTooltipOpen] = React.useState(false);
+    const [infoTooltipStatus, setInfoTooltipStatus] = React.useState(false);
+    const [email, setEmail] = React.useState('');
+    const history = useHistory();
 
     React.useEffect(() => {
         apiClass.getUserApiInfo()
@@ -48,10 +54,19 @@ function App() {
         document.addEventListener('keydown', closeByEscape);
         return () => document.removeEventListener('keydown', closeByEscape);
     }, []);
-    // Сначала выполнил проект с помощью классовых компонентов, только потом посмотрел вебинар и понял,
-    // что хуки намного современее и нужно использовать их. Переделал все под хуки, но не уверен что правильно.
-    // Сделал зависимости от изменения данных, чтобы данные приходили 1 раз. Можете пожалуйста оставить комментарий
-    // правильно ли сделал?
+
+    React.useEffect(() => {
+        if (localStorage.getItem('jwt')) {
+            const jwt = localStorage.getItem('jwt');
+            auth.checkToken(jwt)
+                .then(res => {
+                    setEmail(res.data.email);
+                    setLoggedIn(true);
+                    history.push('/');
+                })
+                .catch(err => console.log(err));
+        }
+    }, [])
 
     function handleCardLike(card) {
         const isLiked = card.likes.some(i => i._id === currentUser._id);
@@ -89,6 +104,7 @@ function App() {
         setIsEditAvatarPopupOpen(false);
         setIsDeleteCardPopupOpen(false);
         setSelectedCard({});
+        setIsInfoTooltipOpen(false);
     }
 
     function handleUpdateUser({ name, about }) {
@@ -143,18 +159,52 @@ function App() {
             })
     }
 
+    function handleLogin(token) {
+        localStorage.setItem('jwt', token);
+        setLoggedIn(true);
+    }
+
+    function handleInfoTooltip(status) {
+        setIsInfoTooltipOpen(true);
+        setInfoTooltipStatus(status);
+    }
+
+    function handleEmail(email) {
+        setEmail(email);
+    }
+
     return (
         <CurrentUserContext.Provider value={currentUser}>
-            <Header />
-            <Main
-                onEditProfile={handleEditProfileClick}
-                onAddPlace={handleAddPlaceClick}
-                onEditAvatar={handleEditAvatarClick}
-                onCardClick={handleCardClick}
-                cards={cards}
-                onCardLike={handleCardLike}
-                onCardDelete={handleCardDelete} />
+            <Header
+                email={email} />
+            <Switch>
+                <Route path="/signup">
+                    <Register
+                        onRegister={handleInfoTooltip} />
+                </Route>
+                <Route path="/signin">
+                    <Login
+                        onLogin={handleLogin}
+                        handleEmail={handleEmail} />
+                </Route>
+                <ProtectedRoute
+                    path="/"
+                    loggedIn={loggedIn}
+                    component={Main}
+                    onEditProfile={handleEditProfileClick}
+                    onAddPlace={handleAddPlaceClick}
+                    onEditAvatar={handleEditAvatarClick}
+                    onCardClick={handleCardClick}
+                    cards={cards}
+                    onCardLike={handleCardLike}
+                    onCardDelete={handleCardDelete}
+                />
+            </Switch>
             <Footer />
+            <InfoTooltip
+                isOpen={isInfoTooltipOpen}
+                popupStatus={infoTooltipStatus}
+                onClose={closeAllPopups} />
             <EditProfilePopup
                 isOpen={isEditProfilePopupOpen}
                 onClose={closeAllPopups}
