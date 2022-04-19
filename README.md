@@ -25,3 +25,5 @@
 
 ## **Ссылки:**
 GitHub профиль: https://github.com/DanyKuzmenko  
+Сайт: https://react-mesto-auth-60f0gqena-danykuzmenko.vercel.app/signin  
+LinkedIn: https://www.linkedin.com/in/daniil-kuzmenko-30a33822b/  
